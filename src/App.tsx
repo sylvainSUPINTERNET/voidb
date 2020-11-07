@@ -2,16 +2,21 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 import {SceneComponent} from "./components/SceneComponent";
-import {FreeCamera, HemisphericLight, MeshBuilder, Vector3} from "@babylonjs/core";
+import {FreeCamera, HemisphericLight, MeshBuilder, ParticleSystem, Scene, Skeleton, Vector3} from "@babylonjs/core";
+import { SceneLoader } from 'babylonjs'
+//import * as BABYLON from 'babylonjs';
+import 'babylonjs-loaders';
+
 
 function App() {
 
     let box: any;
+    let camera: any;
 
     // @ts-ignore
     const onSceneReady = scene => {
         // This creates and positions a free camera (non-mesh)
-        var camera = new FreeCamera("camera1", new Vector3(0, 5, -10), scene);
+        camera = new FreeCamera("camera1", new Vector3(0, 5, -10), scene);
 
         // This targets the camera to scene origin
         camera.setTarget(Vector3.Zero());
@@ -35,6 +40,26 @@ function App() {
 
         // Our built-in 'ground' shape.
         MeshBuilder.CreateGround("ground", {width: 6, height: 6}, scene);
+
+        const dummy = SceneLoader.ImportMesh(
+            "",
+            "./",
+            "cleaned.gltf",
+            scene,
+            (newMeshes, particleSystems, skeletons) => {
+                let skeleton = skeletons[0];
+                let hero = newMeshes[0];
+
+                //Scale the model down
+                hero.scaling.scaleInPlace(0.1);
+                camera.target = hero
+                const idleAnimation = scene.getAnimationGroupByName("idle");
+                idleAnimation.start(true, 1.0, idleAnimation.from, idleAnimation.to, false);
+            })
+
+        SceneLoader.Append("./", "cleaned.gltf", scene, function (scene) {
+            console.log(scene)
+        });
     }
 
     /**
@@ -44,7 +69,6 @@ function App() {
     const onRender = scene => {
         if (box !== undefined) {
             var deltaTimeInMillis = scene.getEngine().getDeltaTime();
-
             const rpm = 10;
             box.rotation.y += ((rpm / 60) * Math.PI * 2 * (deltaTimeInMillis / 20));
         }

@@ -5,6 +5,8 @@ export let SceneComponent = (props: any) => {
     const reactCanvas = useRef(null);
     const { antialias, engineOptions, adaptToDeviceRatio, sceneOptions, onRender, onSceneReady, ...rest } = props;
 
+    
+
     useEffect(() => {
         if (reactCanvas.current) {
             const engine = new Engine(reactCanvas.current, antialias, engineOptions, adaptToDeviceRatio);
